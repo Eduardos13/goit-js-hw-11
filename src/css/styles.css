@@ -32,6 +32,7 @@ section {
   gap: 32px;
 
   margin-top: 36px;
+  margin-bottom: 32px;
 }
 
 .search-form {
@@ -132,8 +133,9 @@ button:hover {
 }
 
 .gallery-item-image {
-  width: 360px;
+  width: 100%;
   height: calc(100% - 48px);
+  object-fit: cover;
 }
 
 .info {

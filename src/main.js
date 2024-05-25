@@ -3,8 +3,12 @@ import "izitoast/dist/css/iziToast.min.css";
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 
+import { getPosts } from "./js/pixabay-api";
+import { postsTemplate } from "./js/render-function";
+
 const form = document.querySelector(".search-form");
 const postsGallery = document.querySelector(".gallery");
+const loader = document.querySelector(".loader");
 
 
 function handleSubmit(event) {
@@ -19,62 +23,47 @@ function handleSubmit(event) {
             message: "Please enter a search query",
         });
         return;
-    }
+    };
 
-    getPosts(query).then(data => {
+    postsGallery.innerHTML = "";
 
-        const markup = postsTemplate(data.hits);
+    getPosts(query)
+        .then(data => {
 
-        if (!data.hits.length) {
-            iziToast.error({
-                title: "No result",
-                message: "Sorry, there are no images matching your search query. Please try again!",
-            });
-            return;
-        }
+            showLoader();
 
-        postsGallery.insertAdjacentHTML("beforeend", markup);
-        const lightbox = new SimpleLightbox(".gallery a")
-        lightbox.refresh();
-    })
-}
+            const markup = postsTemplate(data.hits);
+
+            if (!data.hits.length) {
+                iziToast.error({
+                    title: "No result",
+                    message: "Sorry, there are no images matching your search query. Please try again!",
+                });
+                return;
+            }
+
+            postsGallery.insertAdjacentHTML("beforeend", markup);
+            const lightbox = new SimpleLightbox(".gallery a");
+            lightbox.refresh();
+        })
+        .catch(error => {
+            iziToast.warning({
+                title: "Error",
+                message: `Something went wrong. ${error.message}`
+            })
+        }) 
+        .finally(() => {
+            event.target.reset();
+            hideLoader();
+        })
+};
 
 form.addEventListener("submit", handleSubmit)
 
-function getPosts(searchQuery) {
-
-    const BASE_URL = "https://pixabay.com";
-    const END_POINT = "/api";
-    const params = new URLSearchParams({
-        key: "44024733-f77ed4f0ed7e81c67856c8782",
-        q: searchQuery,
-        image_type: "photo",
-        orientation: "horizontal",
-        safesearch: true
-    });
-
-    const url = `${BASE_URL}${END_POINT}?${params}`;
-
-    return fetch(url)
-        .then(respond => respond.json());
+function showLoader() {
+    loader.style.display = "block";
 };
 
-function postTemplate(post) {
-    return `
-        <li class="gallery-item">
-            <a href="${post.largeImageURL}">
-                <img src="${post.webformatURL}" alt="${post.tags}" class="gallery-item-image">
-                <div class="info">
-                    <p class="info-title">Likes:<span class="info-value">${post.likes}</span></p>
-                    <p class="info-title">Views:<span class="info-value">${post.views}</span></p>
-                    <p class="info-title">Comments:<span class="info-value">${post.comments}</span></p>
-                    <p class="info-title">Downloads:<span class="info-value">${post.downloads}</span></p>
-                </div>
-            </a>
-        </li>
-    `
-};
-
-function postsTemplate(arr) {
-    return arr.map(postTemplate).join("");
-};
+function hideLoader() {
+    loader.style.display = "none";
+}
