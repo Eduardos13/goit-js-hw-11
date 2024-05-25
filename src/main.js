@@ -13,9 +13,25 @@ function handleSubmit(event) {
 
     const query = event.target.elements.searchQuery.value.trim();
 
+    if (!query) {
+        iziToast.info({
+            title: "No data",
+            message: "Please enter a search query",
+        });
+        return;
+    }
+
     getPosts(query).then(data => {
 
         const markup = postsTemplate(data.hits);
+
+        if (!data.hits.length) {
+            iziToast.error({
+                title: "No result",
+                message: "Sorry, there are no images matching your search query. Please try again!",
+            });
+            return;
+        }
 
         postsGallery.insertAdjacentHTML("beforeend", markup);
         const lightbox = new SimpleLightbox(".gallery a")
