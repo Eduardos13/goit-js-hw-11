@@ -10,6 +10,7 @@ const form = document.querySelector(".search-form");
 const postsGallery = document.querySelector(".gallery");
 const loader = document.querySelector(".loader");
 
+hideLoader();
 
 function handleSubmit(event) {
 
@@ -27,10 +28,11 @@ function handleSubmit(event) {
 
     postsGallery.innerHTML = "";
 
+    showLoader();
+
     getPosts(query)
         .then(data => {
 
-            showLoader();
 
             const markup = postsTemplate(data.hits);
 

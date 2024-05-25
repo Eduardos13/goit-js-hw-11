@@ -12,5 +12,9 @@ export function getPosts(searchQuery) {
 
     const url = `${BASE_URL}${END_POINT}?${params}`;
 
-    return fetch(url).then(respond => respond.json());
+    return fetch(url)
+        .then(respond => respond.json())
+        .catch(error => {
+            throw new Error (`HTTP error! status: ${response.status}`)
+        })
 };
